@@ -62,11 +62,13 @@ footer{display:flex;align-items:center;justify-content:center;gap:12px;color:var
 .btn{font-family:inherit;background:var(--inp);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px 14px;cursor:pointer;font-size:14px}.btn:hover{border-color:var(--a)}
 tfoot td{position:sticky;bottom:0;background:var(--bg2);font-weight:500;color:var(--a);border-top:2px solid var(--bd)}
 @media(max-width:820px){nav .lbox{display:none}.hero .lbox{width:110px}}
+textarea{width:100%;min-height:260px;font-family:inherit;color:var(--tx);background:var(--inp);border:1px solid var(--bd);border-radius:12px;padding:12px;font-size:14px;line-height:1.7;resize:vertical}
+.okc{color:var(--ok)}.badc{color:var(--bad)}a.btn{text-decoration:none;display:inline-block}
 </style>
 </head>
 <body>
 <div class="wrap">
-<nav><div class="lbox"><img data-logo alt="BlueBird Aero Systems"></div><h1>מחשבון שכר ✦</h1><a href="#hours">ימי עבודה ושעות</a><a href="#summary">סיכום כללי</a><a href="#travel">שעות נסיעה</a><a href="#ot">שעות נוספות</a><a href="#meals">ארוחת שטח</a><a href="#tax">מסים וניכויים</a><a href="#settings">הגדרות</a></nav>
+<nav><div class="lbox"><img data-logo alt="BlueBird Aero Systems"></div><h1>מחשבון שכר ✦</h1><a href="#hours">ימי עבודה ושעות</a><a href="#summary">סיכום כללי</a><a href="#travel">שעות נסיעה</a><a href="#ot">שעות נוספות</a><a href="#meals">ארוחת שטח</a><a href="#tax">מסים וניכויים</a><a href="#cmp">השוואת תלוש</a><a href="#settings">הגדרות</a></nav>
 <main>
 <header class="hero"><div class="lbox"><img data-logo alt="BlueBird Aero Systems"></div><div><b>מחשבון שכר</b><span>מעקב שעות, שכר ומסים</span></div></header>
 <section id="hours"><h2>ימי עבודה ושעות<img data-logo class="mini" alt=""></h2>
@@ -123,6 +125,16 @@ tfoot td{position:sticky;bottom:0;background:var(--bg2);font-weight:500;color:va
 <details><summary>מדרגות מס הכנסה 2026 (חודשי)</summary><div class="rows" style="margin-top:8px">
 <div><span>עד 7,010</span><b>10%</b></div><div><span>7,011–10,060</span><b>14%</b></div><div><span>10,061–19,000</span><b>20%</b></div><div><span>19,001–25,100</span><b>31%</b></div><div><span>25,101–46,690</span><b>35%</b></div><div><span>46,691–60,130</span><b>47%</b></div><div><span>מעל 60,130</span><b>50%</b></div></div></details>
 <p class="note">לא כולל קרן פנסיה והשתלמות. ביטוח לאומי ובריאות: שיעור מופחת עד 7,703 ₪ (1.04% / 3.23%), ומעל זה 7% / 5.17% עד תקרה של 51,910 ₪. זו הערכה, וכדאי להשוות לתלוש האמיתי.</p>
+</section>
+
+<section id="cmp"><h2>השוואת תלוש לדיווח<img data-logo class="mini" alt=""></h2>
+<div class="top"><input type="month" id="cm"><label class="btn" for="slip">העלאת תלוש (PDF)</label><input type="file" id="slip" accept=".pdf" hidden></div>
+<p class="note" style="margin:0 0 12px">בוחרים את חודש התלוש ומעלים אותו. האתר קורא את המספרים (אפשר לתקן ידנית) ומשווה אותם לשעות שהוזנו בטבלה של אותו חודש, כלומר לדיווח מ-Attenix.</p>
+<div class="sg" id="slf"></div>
+<div class="scroll" style="margin-top:14px;max-height:none"><table id="cmpt" style="min-width:640px"></table></div>
+<div class="sg" style="margin-top:16px"><div><label>שם המנהל/ת (לפתיחת ההודעה, לא חובה)</label><input id="mgr"></div><div><label>השם שלך (לחתימה)</label><input id="me"></div></div>
+<div class="top" style="margin-top:12px"><button id="mk">נסח הודעה למנהל/ת</button></div>
+<div id="mbox" style="display:none"><textarea id="msg"></textarea><div class="top" style="margin-top:10px"><button id="cpy">העתק הודעה</button><a class="btn" id="mail" href="#">פתח במייל</a></div></div>
 </section>
 
 <section id="settings"><h2>הגדרות</h2>
@@ -199,7 +211,7 @@ $('#tb').addEventListener('input',e=>{
  const d=tr.dataset.d;D[mk]=D[mk]||{};D[mk][d]=D[mk][d]||{};
  D[mk][d][k]=k==='l'?e.target.checked:(parseFloat(e.target.value)||0);sv();calc();
 });
-$('#mon').addEventListener('change',e=>{if(e.target.value){mk=e.target.value;build()}});
+$('#mon').addEventListener('change',e=>{if(e.target.value){mk=e.target.value;build();$('#cm').value=mk;loadSl()}});
 $('#clr').addEventListener('click',()=>{if(confirm('לנקות את כל שעות החודש?')){delete D[mk];sv();build()}});
 $('#sg').innerHTML=FIELDS.map(([k,l])=>`<div><label>${l}</label><input type="number" step="any" data-s="${k}" value="${S[k]}"></div>`).join('');
 $('#sg').addEventListener('input',e=>{const k=e.target.dataset.s;if(k){S[k]=parseFloat(e.target.value)||0;sv();calc()}});
@@ -246,7 +258,7 @@ function showPv(P){
  $('#pv').style.display='block';$('#pmsg').textContent='זוהו '+rows.length+' ימים. בדוק ותקן לפני האישור.';
 }
 $('#pt').addEventListener('input',e=>{const tr=e.target.closest('tr'),f=e.target.dataset.f;if(!tr||!f||!PV)return;PV[tr.dataset.k][tr.dataset.d][f]=f==='l'?(e.target.checked?1:0):(parseFloat(e.target.value)||0)});
-$('#apply').addEventListener('click',()=>{if(!PV)return;let last;for(const k of Object.keys(PV).sort()){D[k]=D[k]||{};for(const d in PV[k]){const x=PV[k][d];D[k][d]={o:x.o||0,f:x.f||0,th:x.th||0,tb:x.tb||0,ml:x.ml||0,l:!!x.l,nm:x.nm||0}}last=k}sv();PV=null;$('#pv').style.display='none';mk=last;$('#mon').value=mk;build()});
+$('#apply').addEventListener('click',()=>{if(!PV)return;let last;for(const k of Object.keys(PV).sort()){D[k]=D[k]||{};for(const d in PV[k]){const x=PV[k][d];D[k][d]={o:x.o||0,f:x.f||0,th:x.th||0,tb:x.tb||0,ml:x.ml||0,l:!!x.l,nm:x.nm||0}}last=k}sv();PV=null;$('#pv').style.display='none';mk=last;$('#mon').value=mk;build();$('#cm').value=mk;loadSl()});
 $('#cancel').addEventListener('click',()=>{PV=null;$('#pv').style.display='none'});
 /*PDF-START*/
 function parsePg(it,P){
@@ -305,6 +317,137 @@ $('#xl').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;co
   else{if(!window.XLSX){alert('ספריית Excel לא נטענה, נסה לרענן את הדף');return}const wb=XLSX.read(ev.target.result,{type:'array'});showPv(parseXL(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''})))}
  }catch(err){console.error(err);alert('לא הצלחתי לקרוא את הקובץ')}};
  rd.readAsArrayBuffer(f);e.target.value=''});
+/*CMP-START*/
+const CMP=[
+ {k:'reg',l:'שעות רגילות (100%)',s:'שעות רגילות (100%)',t:'h',ds:'w'},
+ {k:'o125',l:'שעות נוספות 125%',s:'שעות נוספות 125%',t:'h',ds:'ot'},
+ {k:'o150',l:'שעות נוספות 150%',s:'שעות נוספות 150%',t:'h',ds:'ot'},
+ {k:'trav',l:'שעות נסיעה',s:'שעות נסיעה',t:'h',ds:'tr'},
+ {k:'lod',l:'לינות (בונוס לינה)',s:'בונוס לינה',t:'u',u:'לילות',u1:'לילה',ds:'lod'},
+ {k:'td',l:'ימי נסיעה (החזר נסיעות)',s:'החזר נסיעות',t:'u',u:'ימים',u1:'יום',ds:'w'},
+ {k:'ml',l:'ארוחות שטח לתשלום',s:'ארוחות שטח לתשלום',t:'u',u:'מנות',u1:'מנה',ds:'ml'},
+ {k:'gross',l:'סה״כ תשלומים (ברוטו)',s:'סה״כ תשלומים',t:'m'}];
+const INF=[['tax','מס הכנסה (מהתלוש)'],['bl','ביטוח לאומי (מהתלוש)'],['hl','מס בריאות (מהתלוש)'],['net','נטו לתשלום (מהתלוש)']];
+const MNS=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+let SL={},CK={},LAST=[];
+const fm=(v,t)=>t==='m'?n(v):h(v);
+function stats(k){
+ const M=D[k]||{},q0=k.split('-').map(Number),m=q0[1],fd=new Date(q0[0],m-1,1).getDay();
+ const r={reg:0,o125:0,o150:0,trav:0,lod:0,td:0,ent:0,ord:0,wage:0,oh:0,fh:0,ds:{ot:[],lod:[],tr:[],ml:[],w:[]}},WK={};
+ Object.keys(M).map(Number).sort((a,b)=>a-b).forEach(d=>{
+  const c=M[d],o=+c.o||0,f=+c.f||0,th=+c.th||0,tb=+c.tb||0,H=o+f,ml=+c.ml||0;
+  if(!(H||th||tb||c.l||ml))return;
+  const nm=+c.nm||S.norm,ot=Math.max(0,H-nm),a=Math.min(ot,S.tier),b=ot-a,rt=H?(o*S.office+f*S.field)/H:0,dt=d+'/'+m;
+  r.reg+=Math.min(H,nm);r.o125+=a;r.o150+=b;r.trav+=th+tb;r.oh+=o;r.fh+=f;
+  if(H>0){r.td++;r.ds.w.push(dt)}
+  if(c.l){r.lod++;r.ds.lod.push(dt)}
+  if(ot>0)r.ds.ot.push(dt+' ('+h(ot)+' ש׳)');
+  if(th+tb>0)r.ds.tr.push(dt+' ('+h(th+tb)+' ש׳)');
+  const e=f>0?(H>8?2:1):0;r.ent+=e;r.ord+=ml;if(e||ml)r.ds.ml.push(dt);
+  r.wage+=o*S.office+(f+th+tb)*S.field+(S.otOk?rt*(a*(S.m1-1)+b*(S.m2-1)):0);
+  const wi=Math.floor((d+fd-1)/7);WK[wi]=(WK[wi]||0)+Math.min(H,nm);
+ });
+ let WO=0;for(const q in WK)WO+=Math.max(0,WK[q]-S.week);
+ r.avg=(r.oh+r.fh)?(r.oh*S.office+r.fh*S.field)/(r.oh+r.fh):S.field;
+ r.ml=Math.max(0,r.ent+S.carry-r.ord);
+ r.gross=r.wage+(S.otOk?WO*r.avg*(S.m1-1):0)+r.td*S.travel+r.lod*S.lodge+r.ml*S.mealP;
+ return r}
+function cmpRender(){
+ const k=$('#cm').value;if(!k)return;
+ if(typeof ARCH!=='undefined'&&ARCH[k]){$('#cmpt').innerHTML='<tbody><tr><td>לחודש הזה אין דיווח יומי באתר, ולכן אי אפשר להשוות.</td></tr></tbody>';LAST=[];return}
+ const st=stats(k),UV={reg:st.avg,o125:st.avg*S.m1,o150:st.avg*S.m2,trav:S.field,lod:S.lodge,td:S.travel,ml:S.mealP,gross:1},tol={h:0.05,u:0.01,m:2};
+ if(!st.td&&!st.reg&&!st.trav){$('#cmpt').innerHTML='<tbody><tr><td>עדיין אין דיווח יומי לחודש הזה. בסקשן "ימי עבודה ושעות" בוחרים את החודש ומעלים את ה-PDF של Attenix, ואז ההשוואה תופיע כאן.</td></tr></tbody>';LAST=[];return}
+ LAST=[];let rows='';
+ CMP.forEach(c=>{
+  const a=st[c.k],p=SL[c.k];
+  if(p===undefined){rows+=`<tr><td class="d">${c.l}</td><td>${fm(a,c.t)}</td><td>—</td><td>—</td><td>—</td><td>לא הוזן</td><td></td></tr>`;return}
+  const diff=p-a,val=diff*UV[c.k],bad=Math.abs(diff)>tol[c.t];
+  if(CK[c.k]===undefined)CK[c.k]=bad;
+  LAST.push({c,a,p,diff,val,bad});
+  rows+=`<tr><td class="d">${c.l}</td><td>${fm(a,c.t)}</td><td>${fm(p,c.t)}</td><td class="${bad?'badc':'okc'}">${diff>0?'+':''}${fm(diff,c.t)}</td><td>${bad&&c.t!=='m'?n(val):'—'}</td><td class="${bad?'badc':'okc'}">${bad?(diff<0?'⚠ שולם פחות':'⚠ שולם יותר'):'✓ תואם'}</td><td>${bad&&c.k!=='gross'?`<input type="checkbox" data-ck="${c.k}" ${CK[c.k]?'checked':''}>`:''}</td></tr>`;
+ });
+ $('#cmpt').innerHTML='<thead><tr><th>פריט</th><th>באתר (Attenix)</th><th>בתלוש</th><th>הפרש</th><th>שווי (₪)</th><th>סטטוס</th><th>בהודעה</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+function buildMsg(){
+ const k=$('#cm').value;if(!k)return;
+ const q0=k.split('-').map(Number),st=stats(k);cmpRender();
+ const it=LAST.filter(x=>x.bad&&x.c.k!=='gross'&&CK[x.c.k]),g=LAST.find(x=>x.c.k==='gross'),mn=MNS[q0[1]-1]+' '+q0[0];
+ const qv=(c,v)=>c.t==='h'?h(v)+' שעות':h(v)+' '+(Math.abs(v)===1?c.u1:c.u);
+ let t='נושא: בקשה לבדיקת תלוש שכר '+mn+'\n\nשלום'+(S.mgr?' '+S.mgr:'')+',\n\n';
+ if(!it.length)t+='בדקתי את תלוש השכר לחודש '+mn+' מול דוח הנוכחות ב-Attenix ולא מצאתי הבדלים.\n\nתודה,\n'+(S.me||'');
+ else{
+  t+='בבדיקת תלוש השכר לחודש '+mn+' מול דוח הנוכחות ב-Attenix מצאתי את ההבדלים הבאים:\n\n';let sum=0;
+  it.forEach((x,i)=>{
+   const c=x.c,ab=Math.abs(x.diff),dl=st.ds[c.ds];sum+=x.val;
+   t+=(i+1)+'. '+c.s+'\n   בדוח Attenix: '+qv(c,x.a)+', בתלוש: '+qv(c,x.p)+'\n   הפער: '+(x.diff<0?'חסרים בתלוש ':'שולמו יותר בתלוש ')+qv(c,ab)+', בערך '+n(Math.abs(x.val))+' ברוטו\n';
+   if(dl&&dl.length)t+='   ימים בדוח: '+dl.slice(0,15).join(', ')+(dl.length>15?' ...':'')+'\n';
+   t+='   לתיקון: '+(x.diff<0?'להוסיף לתלוש '+qv(c,ab)+' ('+c.s+') לפי הדוח.':'לבדוק את ההפרש מול הדוח, כי בתלוש שולם יותר ממה שדווח.')+'\n\n';
+  });
+  t+=(sum<0?'סה״כ חסר בתלוש, לפי הפריטים, בערך '+n(-sum):'סה״כ שולם בתלוש יותר, לפי הפריטים, בערך '+n(sum))+' ברוטו.\n';
+  if(g&&g.bad)t+='בסה״כ התשלומים: בתלוש '+n(g.p)+' לעומת '+n(g.a)+' לפי חישוב מהדוח.\n';
+  t+='\nאשמח לבדיקה, ואם יש פער שמגיע לי, לתשלום שלו בתלוש הקרוב.\n\nתודה,\n'+(S.me||'');
+ }
+ $('#msg').value=t;$('#mbox').style.display='block';
+ const ls=t.split('\n');$('#mail').href='mailto:?subject='+encodeURIComponent(ls[0].replace('נושא: ',''))+'&body='+encodeURIComponent(ls.slice(2).join('\n'));
+}
+const rev=s=>[...s].reverse().join('');
+function sRows(it){
+ const rs=[];[...it].sort((a,b)=>a.y-b.y).forEach(t=>{let r=rs.find(r=>Math.abs(r.y-t.y)<2.5);if(!r){r={y:t.y,t:[]};rs.push(r)}r.t.push(t)});
+ return rs.map(r=>{r.t.sort((a,b)=>a.x-b.x);
+  const ns=r.t.map(t=>{const m=t.s.replace(/[,\s]/g,'').match(/^([-−])?(\d+(?:\.\d+)?)([-−])?$/);return m?((m[1]||m[3])?-1:1)*parseFloat(m[2]):null}).filter(v=>v!==null);
+  return{s:r.t.map(t=>t.s).join(' '),ns}})}
+function qtyOf(a){if(a.length<3)return null;for(let i=1;i<a.length;i++)for(let j=i+1;j<a.length;j++)if(Math.abs(a[i]*a[j]-a[0])<=Math.max(0.06,Math.abs(a[0])*0.002))return a[j];return null}
+function parseSlip(it){
+ const R={},add=(k,v)=>{if(v!==null&&!isNaN(v))R[k]=Math.round(((R[k]||0)+v)*100)/100},W=(s,w)=>s.includes(w)||s.includes(rev(w)),first=(k,v)=>{if(R[k]===undefined&&v!==undefined)R[k]=v};
+ let mon=null;
+ for(const r of sRows(it)){
+  const s=r.s,a=r.ns;
+  if(mon===null&&W(s,'לחודש')){const mi=MNS.findIndex(x=>W(s,x)),y=(s.match(/20\d\d/)||[])[0];if(mi>=0&&y)mon=y+'-'+String(mi+1).padStart(2,'0')}
+  if(W(s,'שווי')&&W(s,'ארוחות'))continue;
+  const q=qtyOf(a);
+  if(W(s,'לינה')&&q!==null)add('lod',q);
+  else if(W(s,'נסיעות')&&W(s,'שטח')&&q!==null)add('trav',q);
+  else if(W(s,'נסיעות')&&q!==null)add('td',q);
+  else if(W(s,'ארוחות')&&W(s,'שטח')&&q!==null)add('ml',q);
+  else if(/150%|%051/.test(s)&&q!==null)add('o150',q);
+  else if(/125%|%521/.test(s)&&q!==null)add('o125',q);
+  else if(W(s,'שעות')&&(W(s,'שטח')||W(s,'משרד'))&&!/%/.test(s)&&q!==null)add('reg',q);
+  else if(W(s,'תשלומים')&&!W(s,'בגין')&&a.length>=1)first('gross',a[0]);
+  else if(W(s,'נטו')&&W(s,'לתשלום')&&a.length>=1)first('net',a[0]);
+  else if(W(s,'מס')&&W(s,'הכנסה')&&!W(s,'ברוטו')&&!W(s,'ניכוי')&&!W(s,'אחוז')&&!W(s,'למס')&&a.length>=2)first('tax',a[0]);
+  else if(W(s,'ביטוח')&&W(s,'לאומי')&&!W(s,'ברוטו')&&!W(s,'ניכוי')&&a.length>=2)first('bl',a[0]);
+  else if(W(s,'ביטוח')&&W(s,'בריאות')&&!W(s,'ברוטו')&&!W(s,'ניכוי')&&a.length>=2)first('hl',a[0]);
+ }
+ if(mon)R._mon=mon;return R}
+async function pdfItems(buf){
+ if(window.pdfjsLib&&!pdfjsLib.GlobalWorkerOptions.workerSrc)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+ const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise,out=[];
+ for(let p=1;p<=pdf.numPages;p++){const pg=await pdf.getPage(p),H=pg.view[3],tc=await pg.getTextContent();tc.items.filter(i=>i.str&&i.str.trim()).forEach(i=>out.push({s:i.str.trim(),x:i.transform[4]+i.width/2,y:H-i.transform[5]+p*10000}))}
+ return out}
+$('#slf').innerHTML=CMP.map(c=>`<div><label>${c.l} בתלוש</label><input type="number" step="any" data-sf="${c.k}"></div>`).join('')+INF.map(x=>`<div><label>${x[1]}</label><input type="number" step="any" data-sf="${x[0]}"></div>`).join('');
+function fillSl(){document.querySelectorAll('#slf input').forEach(i=>{const v=SL[i.dataset.sf];i.value=v===undefined?'':v})}
+function loadSl(){SL=D['slip:'+$('#cm').value]||{};CK={};fillSl();cmpRender()}
+$('#cm').value=mk;
+$('#cm').addEventListener('change',loadSl);
+$('#slf').addEventListener('input',e=>{const k=e.target.dataset.sf;if(!k)return;const v=parseFloat(e.target.value);if(isNaN(v))delete SL[k];else SL[k]=v;D['slip:'+$('#cm').value]=SL;sv();cmpRender()});
+$('#cmpt').addEventListener('change',e=>{const k=e.target.dataset.ck;if(k)CK[k]=e.target.checked});
+$('#mgr').value=S.mgr||'';$('#me').value=S.me||'';
+$('#mgr').addEventListener('input',e=>{S.mgr=e.target.value;sv()});$('#me').addEventListener('input',e=>{S.me=e.target.value;sv()});
+$('#mk').addEventListener('click',buildMsg);
+$('#cpy').addEventListener('click',async()=>{const t=$('#msg').value;try{await navigator.clipboard.writeText(t)}catch(e){$('#msg').select();document.execCommand('copy')}$('#cpy').textContent='הועתק ✓';setTimeout(()=>{$('#cpy').textContent='העתק הודעה'},1800)});
+$('#slip').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+ if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf'){alert('אפשר להעלות תלוש רק כקובץ PDF. אפשר גם למלא את המספרים ידנית.');e.target.value='';return}
+ if(!window.pdfjsLib){alert('ספריית ה-PDF לא נטענה, בדוק חיבור לאינטרנט ורענן');return}
+ const rd=new FileReader();rd.onload=async ev=>{try{
+  const R=parseSlip(await pdfItems(ev.target.result)),mon=R._mon;delete R._mon;
+  if(!Object.keys(R).length){alert('לא זיהיתי נתונים בתלוש. אפשר למלא את המספרים ידנית.');return}
+  if(mon)$('#cm').value=mon;
+  SL=R;CK={};D['slip:'+$('#cm').value]=SL;sv();fillSl();cmpRender();
+ }catch(err){console.error(err);alert('לא הצלחתי לקרוא את התלוש')}};
+ rd.readAsArrayBuffer(f);e.target.value=''});
+loadSl();
+/*CMP-END*/
+
 build();
 </script>
 </body>
